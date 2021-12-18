@@ -6,6 +6,8 @@ from tabulate import tabulate
 from datetime import datetime, timedelta
 from secrets import TOKEN
 
+DATA_FILE, PREFIX_FILE, REMINDERS_FILE = "data.eri", "prefixes.txt", "reminders.txt"
+
 class course:
     def __init__(self,name, instructors, students, sections, gpa,rating,difficulty): #for the entire course
         self.name = name
@@ -35,11 +37,9 @@ class instructor_course:
     def __lt__(self,oth):
         return self.gpa > oth.gpa #for sorting purposes
 
-def read_from_file():                           #file made by another program from entire dataset
-    file = open('data.eri','r')                 #stored in .eri files, aka my initials B)
-    lines = file.read() 
-    lines = lines.split('\n')                  #read_lines doesn't remove \n, fucks with whole progrm
-    file.close()
+def read_from_file():
+    with open(DATA_FILE) as file:
+        lines = [line.rstrip() for line in file]
     for line in lines:                          #go through all the lines
         words = line.split(':')
         if words[0] == 'c':                     #if its a class
@@ -65,9 +65,8 @@ def read_from_file():                           #file made by another program fr
 ##########Following code based on: https://stackoverflow.com/questions/56796991/discord-py-changing-prefix-with-command
 
 def read_prefixes():
-    file = open("prefixes.txt",'r')
-    lines=file.read().split('\n')
-    file.close()
+    with open(DATA_FILE) as file:
+        lines = [line.rstrip() for line in file]
     prefixes={}
     for line in lines:
         try:
@@ -113,9 +112,8 @@ async def setprefix(ctx, *, prefixes=""):
 
 #we wanna change guild id if its in file, otherwise add it
 def alterPrefixFile(gid,prefix):
-    file = open("prefixes.txt",'r')
-    lines=file.read().split('\n')#get lines
-    file.close()
+    with open(PREFIX_FILE) as file:
+        lines = [line.rstrip() for line in file]
     found = False
     for line in lines:#iterate through lines
         data=line.split(',')
@@ -303,9 +301,11 @@ async def reminders(ctx):
         guild = None #no guild if its a DM
     channel = ctx.channel.id # get channel 
     
-    file = open('reminders.txt','r')
-    reminders = file.read().split('\n')#author id, reminder text, server id, channel id, time to send
-    file.close()
+    with open(REMINDERS_FILE) as file:
+        reminders = [line.rstrip() for line in file]
+#     file = open('reminders.txt','r')
+#     reminders = file.read().split('\n')#author id, reminder text, server id, channel id, time to send
+#     file.close()
 
     active_reminders = []
     
